@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <PyodideHelloWorld />
+    <TrainTestSplit />
   </div>
 </template>
 
 <script>
-import PyodideHelloWorld from "./components/PyodideHelloWorld.vue";
+import TrainTestSplit from "./components/TrainTestSplit.vue";
 
 export default {
   name: "App",
   components: {
-    PyodideHelloWorld,
+    TrainTestSplit,
   },
 };
 </script>

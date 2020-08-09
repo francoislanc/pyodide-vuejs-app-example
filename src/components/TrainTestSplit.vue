@@ -7,7 +7,11 @@
           role="alert"
         >
           <span class="whitespace-pre text-lg font-semibold mr-2 text-left"
-            >🤓 scikit-learn in a Vue.js App 🧐
+            >🤓 Running "train_test_split" from scikit-learn in a Vue.js App 🧐
+          </span>
+          <br /><br />
+          <span class="whitespace-pre"
+            >#pyodide #webassembly #python #javascript
           </span>
         </div>
       </div>
@@ -72,7 +76,7 @@ import code1 from "raw-loader!../assets/code1.py";
 import code2 from "raw-loader!../assets/code2.py";
 
 export default {
-  name: "PyodideHelloWorld",
+  name: "TrainTestSplit",
   components: {
     Table,
     Loading,
@@ -124,13 +128,20 @@ export default {
         await window.pyodide.loadPackage(["pandas", "scikit-learn"]);
         this.pyodideLoaded = true;
       } catch (error) {
+        console.log("exception during initializePyodide");
         console.log(error);
       }
     },
     runPythonSplitDataset: function() {
-      const [train, test] = window.pyodide.runPython(code2);
-      this.languagesTrain.rows = train;
-      this.languagesTest.rows = test;
+      try {
+        const [train, test] = window.pyodide.runPython(code2);
+        this.languagesTrain.rows = train;
+        this.languagesTest.rows = test;
+      } catch (error) {
+        console.log("exception druing runPythonSplitDataset");
+        console.log(error);
+      }
+
       this.splittingDataset = false;
     },
     splitDataset: function() {
