@@ -1,0 +1,5 @@
+[X] Improve table layout
+[X] Block action if pyodide is not loaded
+[ ] Host script lib locally
+[ ] Explore web worker solution to avoid freezing app
+[ ] Out of memory error pyodide ?
