@@ -24,7 +24,14 @@
       <div class="col-span-2 flex justify-center">
         <Table :columns="languages.columns" :rows="languages.rows"> </Table>
       </div>
-      <div class="col-span-2 flex justify-center">
+      <div class="col-span-2 flex justify-center gap-4">
+        <label for="file" class="label-file">Upload new csv</label>
+        <input
+          id="file"
+          type="file"
+          class="input-file"
+          @change="onFileChanged"
+        />
         <template v-if="!pyodideLoaded">
           <loading msg="Loading pyodide..." />
         </template>
@@ -120,8 +127,16 @@ export default {
   methods: {
     initializePyodide: async function() {
       try {
+        // if local
+        // window.languagePluginUrl = "http://localhost:8081/pyodide/v0.15.0/";
+        // await Vue.loadScript("/pyodide/v0.15.0/pyodide.js");
+        // else using cdn
+        window.languagePluginUrl =
+          "https://pyodide-cdn2.iodide.io/v0.15.0/full/";
+        await Vue.loadScript(
+          "https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"
+        );
         // load script
-        await Vue.loadScript("/pyodide.js");
         // wait for pyodide ready
         await window.languagePluginLoader;
         // load pandas lib
@@ -151,6 +166,12 @@ export default {
       this.splittingDataset = true;
       setTimeout(this.runPythonSplitDataset, 500);
     },
+    onFileChanged: function(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => console.log(e.target.result);
+      reader.readAsText(file);
+    },
     runTestCommand: function() {
       console.log(window.pyodide.runPython(code1));
     },
@@ -173,6 +194,23 @@ export default {
 }
 
 hover.button {
+  @bg-blue-700;
+}
+
+.input-file {
+  display: none;
+}
+
+.label-file {
+  @apply bg-blue-500;
+  @apply text-white;
+  @apply font-bold;
+  @apply py-2;
+  @apply px-4;
+  @apply rounded;
+  cursor: pointer;
+}
+hover.label-file {
   @bg-blue-700;
 }
 </style>
