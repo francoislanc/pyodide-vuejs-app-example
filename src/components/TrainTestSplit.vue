@@ -74,7 +74,7 @@
           Test dataset ({{ languagesTest.rows.length }})
         </h1>
       </div>
-      <div class="col-span-1 flex justify-center">
+      <div class="col-span-1 flex justify-center mb-4">
         <template v-if="splittingDataset">
           <loading msg="Waiting results..." />
         </template>
@@ -82,10 +82,11 @@
           <Table
             :columns="languagesTrain.columns"
             :rows="languagesTrain.rows"
+            :selected="null"
           ></Table>
         </template>
       </div>
-      <div class="col-span-1 flex justify-center">
+      <div class="col-span-1 flex justify-center mb-4">
         <template v-if="splittingDataset">
           <loading msg="Waiting results..." />
         </template>
@@ -93,6 +94,7 @@
           <Table
             :columns="languagesTest.columns"
             :rows="languagesTest.rows"
+            :selected="null"
           ></Table>
         </template>
       </div>
@@ -199,7 +201,7 @@ export default {
 
       this.splittingDataset = false;
     },
-    resetTables: function(columns) {
+    resetTables: function(columns, resetSelection) {
       this.languagesTrain.rows = [];
       this.languagesTest.rows = [];
       this.languagesTrain.csv = "";
@@ -207,14 +209,16 @@ export default {
       this.languagesTrain.columns = columns;
       this.languagesTest.columns = columns;
       this.errorMsg = null;
-      this.languages.selected = Array.from(
-        { length: columns.length },
-        () => false
-      );
+      if (resetSelection) {
+        this.languages.selected = [];
+        for (let i = 0; i < this.languages.selected.length; i++) {
+          this.languages.selected.push(false);
+        }
+      }
     },
     splitDataset: function() {
       window.languages = JSON.stringify(this.languages);
-      this.resetTables(this.languages.columns);
+      this.resetTables(this.languages.columns, false);
       this.splittingDataset = true;
       setTimeout(this.runPythonSplitDataset, 500);
     },
@@ -231,7 +235,7 @@ export default {
         const [columns, rows] = window.pyodide.runPython(load_csv);
         that.languages.columns = columns;
         that.languages.rows = rows;
-        that.resetTables(that.languages.columns);
+        that.resetTables(that.languages.columns, true);
       };
       reader.readAsText(file);
     },

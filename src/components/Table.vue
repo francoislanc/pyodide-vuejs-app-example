@@ -5,16 +5,13 @@
         <tr class="bg-gray-100">
           <template v-for="(c, i) in columns">
             <th :key="i" class="px-4 py-2 text-center">
-              <p v-if="selected[i]">Selected</p>
-              <p v-else>Not Selected</p>
-              <template v-if="selected.length > 0">
-                <template v-if="selected[i]">
-                  <input type="checkbox" checked @change="toogleCheck(i)" />
-                </template>
-                <template v-else>
-                  <input @change="toogleCheck(i)" type="checkbox" />
-                </template>
-              </template>
+              <input
+                v-if="selected"
+                type="checkbox"
+                id="checkbox"
+                v-model="selected[i]"
+              />
+              <label for="checkbox"></label>
               {{ c }}
             </th>
           </template>
