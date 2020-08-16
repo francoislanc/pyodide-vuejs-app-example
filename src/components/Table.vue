@@ -1,10 +1,21 @@
 <template>
   <div>
-    <table v-if="rows.length > 0" class="table-auto">
+    <table v-if="rows.length > 0" class="table-auto mx-auto">
       <thead>
         <tr class="bg-gray-100">
           <template v-for="(c, i) in columns">
-            <th :key="i" class="px-4 py-2 text-center">{{ c }}</th>
+            <th :key="i" class="px-4 py-2 text-center">
+              <template v-if="selected.length > 0">
+                <input
+                  v-if="selected[i]"
+                  type="checkbox"
+                  checked
+                  @change="check(i)"
+                />
+                <input v-else type="checkbox" @change="check(i)" />
+              </template>
+              {{ c }}
+            </th>
           </template>
         </tr>
       </thead>
@@ -42,13 +53,13 @@ export default {
     return {
       page: 1,
       perPage: 5,
-      pages: [],
+      pages: []
     };
   },
   computed: {
     displayedRows() {
       return this.paginate(this.rows);
-    },
+    }
   },
   methods: {
     setPages() {
@@ -65,6 +76,9 @@ export default {
       let to = page * perPage;
       return rows.slice(from, to);
     },
+    check(i) {
+      this.selected[i] = !this.selected[i];
+    }
   },
   mounted: function() {
     this.setPages();
@@ -72,11 +86,17 @@ export default {
   watch: {
     rows() {
       this.setPages();
-    },
+    }
   },
   props: {
     columns: Array,
     rows: Array,
-  },
+    selected: {
+      type: Array,
+      default: function() {
+        return [];
+      }
+    }
+  }
 };
 </script>

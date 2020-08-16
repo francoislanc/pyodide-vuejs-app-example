@@ -10,7 +10,7 @@ import TrainTestSplit from "./components/TrainTestSplit.vue";
 export default {
   name: "App",
   components: {
-    TrainTestSplit,
-  },
+    TrainTestSplit
+  }
 };
 </script>

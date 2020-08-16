@@ -7,42 +7,62 @@
           role="alert"
         >
           <span class="whitespace-pre text-lg font-semibold mr-2 text-left"
-            >🤓 Running "train_test_split" from scikit-learn in a Vue.js App 🧐
-          </span>
-          <br /><br />
+            >Running "train_test_split" from scikit-learn in a Vue.js App
+            🧐</span
+          >
+          <br />
+          <br />
           <span class="whitespace-pre"
-            >#pyodide #webassembly #python #javascript
-          </span>
+            >#pyodide #webassembly #python #javascript</span
+          >
         </div>
+      </div>
+      <div class="col-span-2 flex justify-center items-center gap-4">
+        <template v-if="!pyodideLoaded">
+          <loading msg="Loading pyodide..." />
+        </template>
+        <template v-else>
+          <label for="file" class="label-file">Upload new csv</label>
+          <input
+            id="file"
+            type="file"
+            class="input-file"
+            @change="onFileChanged"
+          />
+        </template>
       </div>
       <div class="col-span-2">
         <h1 class="text-xl text-center font-semibold">
           Inputs dataset ({{ languages.rows.length }})
         </h1>
+        <p class="text-center">Select columns used for stratified split</p>
       </div>
 
       <div class="col-span-2 flex justify-center">
-        <Table :columns="languages.columns" :rows="languages.rows"> </Table>
+        <Table
+          :columns="languages.columns"
+          :rows="languages.rows"
+          :selected="languages.selected"
+        ></Table>
       </div>
-      <div class="col-span-2 flex justify-center gap-4">
-        <label for="file" class="label-file">Upload new csv</label>
-        <input
-          id="file"
-          type="file"
-          class="input-file"
-          @change="onFileChanged"
-        />
+      <div class="col-span-2 flex justify-center items-center gap-4">
         <template v-if="!pyodideLoaded">
           <loading msg="Loading pyodide..." />
         </template>
         <template v-else>
           <button class="button" v-on:click="splitDataset">
             <span style="white-space: pre;">
-              Split dataset <br />(with scikit-learn 🐍)
+              Split dataset
+              <br />(with scikit-learn 🐍)
             </span>
           </button>
         </template>
       </div>
+      <template v-if="errorMsg">
+        <div class="col-span-2 flex justify-center items-center gap-4">
+          <alert :msg="errorMsg" />
+        </div>
+      </template>
       <div class="col-span-1 flex justify-center">
         <h1 class="text-xl text-center font-semibold">
           Train dataset ({{ languagesTrain.rows.length }})
@@ -58,8 +78,10 @@
           <loading msg="Waiting results..." />
         </template>
         <template v-else>
-          <Table :columns="languagesTrain.columns" :rows="languagesTrain.rows">
-          </Table>
+          <Table
+            :columns="languagesTrain.columns"
+            :rows="languagesTrain.rows"
+          ></Table>
         </template>
       </div>
       <div class="col-span-1 flex justify-center">
@@ -67,10 +89,21 @@
           <loading msg="Waiting results..." />
         </template>
         <template v-else>
-          <Table :columns="languagesTest.columns" :rows="languagesTest.rows">
-          </Table>
+          <Table
+            :columns="languagesTest.columns"
+            :rows="languagesTest.rows"
+          ></Table>
         </template>
       </div>
+      <template v-if="languagesTest.rows.length > 0">
+        <div class="col-span-2 flex justify-center items-center gap-4">
+          <button class="button" v-on:click="downloadDataset">
+            <span style="white-space: pre;">
+              Download datasets
+            </span>
+          </button>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -79,20 +112,25 @@
 import Vue from "vue";
 import Table from "./Table";
 import Loading from "./Loading";
-import code1 from "raw-loader!../assets/code1.py";
-import code2 from "raw-loader!../assets/code2.py";
+import Alert from "./Alert";
+import python_version from "raw-loader!../assets/python_version.py";
+import train_test_split from "raw-loader!../assets/train_test_split.py";
+import load_csv from "raw-loader!../assets/load_csv.py";
 
 export default {
   name: "TrainTestSplit",
   components: {
     Table,
-    Loading,
+    Alert,
+    Loading
   },
   data() {
     return {
       splittingDataset: false,
+      errorMsg: null,
       pyodideLoaded: false,
       languages: {
+        selected: [false, true],
         columns: ["name", "language"],
         rows: [
           { name: "Pasquin", language: "java" },
@@ -108,21 +146,18 @@ export default {
           { name: "Kamagraphy", language: "python" },
           { name: "Quietya57", language: "c" },
           { name: "Sequacious", language: "c" },
-          { name: "Sequacious2", language: "c" },
-        ],
+          { name: "Sequacious2", language: "c" }
+        ]
       },
       languagesTrain: {
         columns: ["name", "language"],
-        rows: [],
+        rows: []
       },
       languagesTest: {
         columns: ["name", "language"],
-        rows: [],
-      },
+        rows: []
+      }
     };
-  },
-  props: {
-    msg: String,
   },
   methods: {
     initializePyodide: async function() {
@@ -143,43 +178,59 @@ export default {
         await window.pyodide.loadPackage(["pandas", "scikit-learn"]);
         this.pyodideLoaded = true;
       } catch (error) {
-        console.log("exception during initializePyodide");
-        console.log(error);
+        this.errorMsg = error;
       }
     },
     runPythonSplitDataset: function() {
       try {
-        const [train, test] = window.pyodide.runPython(code2);
+        const [train, test] = window.pyodide.runPython(train_test_split);
         this.languagesTrain.rows = train;
         this.languagesTest.rows = test;
       } catch (error) {
-        console.log("exception druing runPythonSplitDataset");
-        console.log(error);
+        this.errorMsg = error;
       }
 
       this.splittingDataset = false;
     },
-    splitDataset: function() {
-      window.languages = this.languages;
+    resetTables: function(columns) {
       this.languagesTrain.rows = [];
       this.languagesTest.rows = [];
+      this.languagesTrain.columns = columns;
+      this.languagesTest.columns = columns;
+    },
+    splitDataset: function() {
+      window.languages = JSON.stringify(this.languages);
+      this.resetTables(this.languages.columns);
       this.splittingDataset = true;
       setTimeout(this.runPythonSplitDataset, 500);
+    },
+    downloadDataset: function() {
+      console.log("todo");
     },
     onFileChanged: function(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
-      reader.onload = (e) => console.log(e.target.result);
+      reader.onload = e => {
+        window.csvContent = e.target.result;
+        const [columns, rows] = window.pyodide.runPython(load_csv);
+        this.languages.columns = columns;
+        this.languages.selected = Array.from(
+          { length: columns.length },
+          () => false
+        );
+        this.languages.rows = rows;
+        this.resetTables(this.languages.columns);
+      };
       reader.readAsText(file);
     },
     runTestCommand: function() {
-      console.log(window.pyodide.runPython(code1));
-    },
+      console.log(window.pyodide.runPython(python_version));
+    }
   },
   mounted: async function() {
     await this.initializePyodide();
-    // this.runTestCommand();
-  },
+    this.runTestCommand();
+  }
 };
 </script>
 
