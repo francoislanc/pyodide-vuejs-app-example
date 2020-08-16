@@ -5,14 +5,15 @@
         <tr class="bg-gray-100">
           <template v-for="(c, i) in columns">
             <th :key="i" class="px-4 py-2 text-center">
+              <p v-if="selected[i]">Selected</p>
+              <p v-else>Not Selected</p>
               <template v-if="selected.length > 0">
-                <input
-                  v-if="selected[i]"
-                  type="checkbox"
-                  checked
-                  @change="check(i)"
-                />
-                <input v-else type="checkbox" @change="check(i)" />
+                <template v-if="selected[i]">
+                  <input type="checkbox" checked @change="toogleCheck(i)" />
+                </template>
+                <template v-else>
+                  <input @change="toogleCheck(i)" type="checkbox" />
+                </template>
               </template>
               {{ c }}
             </th>
@@ -75,9 +76,6 @@ export default {
       let from = page * perPage - perPage;
       let to = page * perPage;
       return rows.slice(from, to);
-    },
-    check(i) {
-      this.selected[i] = !this.selected[i];
     }
   },
   mounted: function() {
@@ -89,6 +87,7 @@ export default {
     }
   },
   props: {
+    toogleCheck: Function,
     columns: Array,
     rows: Array,
     selected: {

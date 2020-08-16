@@ -43,6 +43,7 @@
           :columns="languages.columns"
           :rows="languages.rows"
           :selected="languages.selected"
+          :toogleCheck="toogleCheck"
         ></Table>
       </div>
       <div class="col-span-2 flex justify-center items-center gap-4">
@@ -96,7 +97,7 @@
         </template>
       </div>
       <template v-if="languagesTest.rows.length > 0">
-        <div class="col-span-2 flex justify-center items-center gap-4">
+        <div class="col-span-2 flex justify-center items-center gap-4 mb-4">
           <button class="button" v-on:click="downloadDataset">
             <span style="white-space: pre;">
               Download datasets
@@ -130,7 +131,7 @@ export default {
       errorMsg: null,
       pyodideLoaded: false,
       languages: {
-        selected: [false, true],
+        selected: [false, false],
         columns: ["name", "language"],
         rows: [
           { name: "Pasquin", language: "java" },
@@ -151,11 +152,13 @@ export default {
       },
       languagesTrain: {
         columns: ["name", "language"],
-        rows: []
+        rows: [],
+        csv: ""
       },
       languagesTest: {
         columns: ["name", "language"],
-        rows: []
+        rows: [],
+        csv: ""
       }
     };
   },
@@ -183,9 +186,13 @@ export default {
     },
     runPythonSplitDataset: function() {
       try {
-        const [train, test] = window.pyodide.runPython(train_test_split);
+        const [train, test, trainCsv, testCsv] = window.pyodide.runPython(
+          train_test_split
+        );
         this.languagesTrain.rows = train;
         this.languagesTest.rows = test;
+        this.languagesTrain.csv = trainCsv;
+        this.languagesTest.csv = testCsv;
       } catch (error) {
         this.errorMsg = error;
       }
@@ -195,8 +202,15 @@ export default {
     resetTables: function(columns) {
       this.languagesTrain.rows = [];
       this.languagesTest.rows = [];
+      this.languagesTrain.csv = "";
+      this.languagesTest.csv = "";
       this.languagesTrain.columns = columns;
       this.languagesTest.columns = columns;
+      this.errorMsg = null;
+      this.languages.selected = Array.from(
+        { length: columns.length },
+        () => false
+      );
     },
     splitDataset: function() {
       window.languages = JSON.stringify(this.languages);
@@ -205,26 +219,43 @@ export default {
       setTimeout(this.runPythonSplitDataset, 500);
     },
     downloadDataset: function() {
-      console.log("todo");
+      this.download("train.csv", this.languagesTrain.csv);
+      this.download("test.csv", this.languagesTest.csv);
     },
     onFileChanged: function(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
+      const that = this;
       reader.onload = e => {
         window.csvContent = e.target.result;
         const [columns, rows] = window.pyodide.runPython(load_csv);
-        this.languages.columns = columns;
-        this.languages.selected = Array.from(
-          { length: columns.length },
-          () => false
-        );
-        this.languages.rows = rows;
-        this.resetTables(this.languages.columns);
+        that.languages.columns = columns;
+        that.languages.rows = rows;
+        that.resetTables(that.languages.columns);
       };
       reader.readAsText(file);
     },
     runTestCommand: function() {
       console.log(window.pyodide.runPython(python_version));
+    },
+    download: function(filename, text) {
+      var pom = document.createElement("a");
+      pom.setAttribute(
+        "href",
+        "data:text/csv;charset=utf-8," + encodeURIComponent(text)
+      );
+      pom.setAttribute("download", filename);
+
+      if (document.createEvent) {
+        var event = document.createEvent("MouseEvents");
+        event.initEvent("click", true, true);
+        pom.dispatchEvent(event);
+      } else {
+        pom.click();
+      }
+    },
+    toogleCheck(i) {
+      this.$set(this.languages.selected, i, !this.languages.selected[i]);
     }
   },
   mounted: async function() {

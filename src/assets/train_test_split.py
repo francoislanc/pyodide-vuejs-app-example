@@ -18,4 +18,9 @@ X = languages_df.to_dict('records')
 y = languages_df[filtered_columns].values.tolist()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y)
 
-(X_train, X_test)
+X_train_pd = pd.DataFrame(X_train)
+X_test_pd = pd.DataFrame(X_test)
+X_train_csv = X_train_pd.to_csv(index=False)
+X_test_csv = X_test_pd.to_csv(index=False)
+
+(X_train, X_test, X_train_csv, X_test_csv)
