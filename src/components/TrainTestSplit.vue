@@ -116,6 +116,8 @@ import Vue from "vue";
 import Table from "./Table";
 import Loading from "./Loading";
 import Alert from "./Alert";
+import { LOCAL_PYODIDE } from "./config.js";
+
 import python_version from "raw-loader!../assets/python_version.py";
 import train_test_split from "raw-loader!../assets/train_test_split.py";
 import load_csv from "raw-loader!../assets/load_csv.py";
@@ -167,16 +169,16 @@ export default {
   methods: {
     initializePyodide: async function() {
       try {
-        // if local
-        // window.languagePluginUrl = "http://localhost:8081/pyodide/v0.15.0/";
-        // await Vue.loadScript("/pyodide/v0.15.0/pyodide.js");
-        // else using cdn
-        window.languagePluginUrl =
-          "https://pyodide-cdn2.iodide.io/v0.15.0/full/";
-        await Vue.loadScript(
-          "https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"
-        );
-        // load script
+        if (LOCAL_PYODIDE) {
+          window.languagePluginUrl = "http://localhost:8080/pyodide/v0.15.0/";
+          await Vue.loadScript("/pyodide/v0.15.0/pyodide.js");
+        } else {
+          window.languagePluginUrl =
+            "https://pyodide-cdn2.iodide.io/v0.15.0/full/";
+          await Vue.loadScript(
+            "https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"
+          );
+        }
         // wait for pyodide ready
         await window.languagePluginLoader;
         // load pandas lib

@@ -1,4 +1,4 @@
 // .prettierrc.js
 module.exports = {
-    tailingComma: 'all'
-  };
+  tailingComma: "all"
+};
