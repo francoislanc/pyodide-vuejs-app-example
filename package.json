@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test": "jest",
-    "deploy": "rm -rf node_modules/.cache && rm -rf out && yarn build && touch dist/.nojekyll && gh-pages -d dist -t true"
+    "deploy": "rm -rf node_modules/.cache && rm -rf dist && yarn build && touch dist/.nojekyll && gh-pages -d dist -t true"
   },
   "jest": {
     "preset": "jest-playwright-preset"

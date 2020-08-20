@@ -6,5 +6,5 @@ module.exports = {
     });
   },
   publicPath:
-    process.env.NODE_ENV === "production" ? "/pyodide-vuejs-app-example/" : ""
+    process.env.NODE_ENV === "production" ? "/pyodide-vuejs-app-example/" : "/"
 };
