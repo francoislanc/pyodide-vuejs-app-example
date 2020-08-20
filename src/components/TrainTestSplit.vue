@@ -33,7 +33,7 @@
       </div>
       <div class="col-span-2">
         <h1 class="text-xl text-center font-semibold">
-          Inputs dataset ({{ languages.rows.length }})
+          Input dataset ({{ languages.rows.length }})
         </h1>
         <p class="text-center">Select columns used for stratified split</p>
       </div>
