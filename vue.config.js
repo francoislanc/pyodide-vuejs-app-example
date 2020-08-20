@@ -1,7 +1,7 @@
 module.exports = {
   chainWebpack: config => {
     config.plugin("html").tap(args => {
-      args[0].title = "scikit-learn in a Vue.js App";
+      args[0].title = "Pyodide Vue.js App example";
       return args;
     });
   }

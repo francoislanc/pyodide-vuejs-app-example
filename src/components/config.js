@@ -1,1 +1,1 @@
-export const LOCAL_PYODIDE = true;
+export const LOCAL_PYODIDE = false;

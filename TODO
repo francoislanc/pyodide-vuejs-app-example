@@ -1,8 +1,0 @@
-[X] Improve table layout
-[X] Block action if pyodide is not loaded
-[X] Catch error
-[X] Host script lib locally (large size ! so go back to cdn)
-[ ] Add a way to upload own datafile
-[ ] Modify code to handle unknown column names
-[ ] Explore web worker solution to avoid freezing app
-[ ] Host demo
