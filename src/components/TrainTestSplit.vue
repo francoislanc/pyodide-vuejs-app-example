@@ -52,7 +52,7 @@
         </template>
         <template v-else>
           <button class="button" v-on:click="splitDataset">
-            <span style="white-space: pre;">
+            <span style="white-space: pre">
               Split dataset
               <br />(with scikit-learn 🐍)
             </span>
@@ -101,9 +101,7 @@
       <template v-if="languagesTest.rows.length > 0">
         <div class="col-span-2 flex justify-center items-center gap-4 mb-4">
           <button class="button" v-on:click="downloadDataset">
-            <span style="white-space: pre;">
-              Download datasets
-            </span>
+            <span style="white-space: pre"> Download datasets </span>
           </button>
         </div>
       </template>
@@ -127,7 +125,7 @@ export default {
   components: {
     Table,
     Alert,
-    Loading
+    Loading,
   },
   data() {
     return {
@@ -151,23 +149,23 @@ export default {
           { name: "Kamagraphy", language: "python" },
           { name: "Quietya57", language: "c" },
           { name: "Sequacious", language: "c" },
-          { name: "Sequacious2", language: "c" }
-        ]
+          { name: "Sequacious2", language: "c" },
+        ],
       },
       languagesTrain: {
         columns: ["name", "language"],
         rows: [],
-        csv: ""
+        csv: "",
       },
       languagesTest: {
         columns: ["name", "language"],
         rows: [],
-        csv: ""
-      }
+        csv: "",
+      },
     };
   },
   methods: {
-    initializePyodide: async function() {
+    initializePyodide: async function () {
       try {
         if (LOCAL_PYODIDE) {
           window.languagePluginUrl = `${LOCAL_PYODIDE_SERVER_URL}`;
@@ -188,7 +186,7 @@ export default {
         this.errorMsg = error;
       }
     },
-    runPythonSplitDataset: function() {
+    runPythonSplitDataset: function () {
       try {
         const [train, test, trainCsv, testCsv] = window.pyodide.runPython(
           train_test_split
@@ -203,7 +201,7 @@ export default {
 
       this.splittingDataset = false;
     },
-    resetTables: function(columns, resetSelection) {
+    resetTables: function (columns, resetSelection) {
       this.languagesTrain.rows = [];
       this.languagesTest.rows = [];
       this.languagesTrain.csv = "";
@@ -218,21 +216,21 @@ export default {
         }
       }
     },
-    splitDataset: function() {
+    splitDataset: function () {
       window.languages = JSON.stringify(this.languages);
       this.resetTables(this.languages.columns, false);
       this.splittingDataset = true;
       setTimeout(this.runPythonSplitDataset, 500);
     },
-    downloadDataset: function() {
+    downloadDataset: function () {
       this.download("train.csv", this.languagesTrain.csv);
       this.download("test.csv", this.languagesTest.csv);
     },
-    onFileChanged: function(event) {
+    onFileChanged: function (event) {
       const file = event.target.files[0];
       const reader = new FileReader();
       const that = this;
-      reader.onload = e => {
+      reader.onload = (e) => {
         window.csvContent = e.target.result;
         const [columns, rows] = window.pyodide.runPython(load_csv);
         that.languages.columns = columns;
@@ -241,10 +239,10 @@ export default {
       };
       reader.readAsText(file);
     },
-    runTestCommand: function() {
+    runTestCommand: function () {
       console.log(window.pyodide.runPython(python_version));
     },
-    download: function(filename, text) {
+    download: function (filename, text) {
       var pom = document.createElement("a");
       pom.setAttribute(
         "href",
@@ -262,12 +260,12 @@ export default {
     },
     toogleCheck(i) {
       this.$set(this.languages.selected, i, !this.languages.selected[i]);
-    }
+    },
   },
-  mounted: async function() {
+  mounted: async function () {
     await this.initializePyodide();
     this.runTestCommand();
-  }
+  },
 };
 </script>
 

@@ -51,13 +51,13 @@ export default {
     return {
       page: 1,
       perPage: 5,
-      pages: []
+      pages: [],
     };
   },
   computed: {
     displayedRows() {
       return this.paginate(this.rows);
-    }
+    },
   },
   methods: {
     setPages() {
@@ -73,15 +73,15 @@ export default {
       let from = page * perPage - perPage;
       let to = page * perPage;
       return rows.slice(from, to);
-    }
+    },
   },
-  mounted: function() {
+  mounted: function () {
     this.setPages();
   },
   watch: {
     rows() {
       this.setPages();
-    }
+    },
   },
   props: {
     toogleCheck: Function,
@@ -89,10 +89,10 @@ export default {
     rows: Array,
     selected: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>

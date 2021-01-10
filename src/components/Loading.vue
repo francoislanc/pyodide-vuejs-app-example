@@ -10,8 +10,8 @@
 export default {
   name: "Loading",
   props: {
-    msg: String
-  }
+    msg: String,
+  },
 };
 </script>
 
