@@ -172,9 +172,9 @@ export default {
           await Vue.loadScript(`${LOCAL_PYODIDE_SERVER_URL}pyodide.js`);
         } else {
           window.languagePluginUrl =
-            "https://pyodide-cdn2.iodide.io/v0.15.0/full/";
+            "https://cdn.jsdelivr.net/pyodide/v0.16.1/full/";
           await Vue.loadScript(
-            "https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"
+            "https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js"
           );
         }
         // wait for pyodide ready
