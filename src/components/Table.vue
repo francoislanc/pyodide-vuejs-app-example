@@ -1,9 +1,9 @@
 <template>
   <div>
-    <table v-if="rows.length > 0" class="table-auto mx-auto">
+    <table v-if="tableValues.rows.length > 0" class="table-auto mx-auto">
       <thead>
         <tr class="bg-gray-100">
-          <template v-for="(c, i) in columns">
+          <template v-for="(c, i) in tableValues.columns">
             <th :key="i" class="px-4 py-2 text-center">
               <input
                 v-if="selected"
@@ -20,7 +20,7 @@
       <tbody>
         <template v-for="(l, i) in displayedRows">
           <tr :key="i">
-            <template v-for="(c, j) in columns">
+            <template v-for="(c, j) in tableValues.columns">
               <td :key="j" class="px-4 py-2 text-center">{{ l[c] }}</td>
             </template>
           </tr>
@@ -56,12 +56,14 @@ export default {
   },
   computed: {
     displayedRows() {
-      return this.paginate(this.rows);
+      return this.paginate(this.tableValues.rows);
     },
   },
   methods: {
     setPages() {
-      let numberOfPages = Math.ceil(this.rows.length / this.perPage);
+      let numberOfPages = Math.ceil(
+        this.tableValues.rows.length / this.perPage
+      );
       this.pages = [];
       for (let index = 1; index <= numberOfPages; index++) {
         this.pages.push(index);
@@ -79,14 +81,25 @@ export default {
     this.setPages();
   },
   watch: {
-    rows() {
+    tableValues(n, o) {
+      console.log(n);
+      console.log(o);
+      console.log(" watch data");
       this.setPages();
     },
   },
   props: {
     toogleCheck: Function,
-    columns: Array,
-    rows: Array,
+    tableValues: {
+      type: Object,
+      default: function () {
+        return {
+          rows: [],
+          columns: [],
+          csv: "",
+        };
+      },
+    },
     selected: {
       type: Array,
       default: function () {

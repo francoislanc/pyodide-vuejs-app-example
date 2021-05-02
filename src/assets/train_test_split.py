@@ -22,5 +22,3 @@ X_train_pd = pd.DataFrame(X_train)
 X_test_pd = pd.DataFrame(X_test)
 X_train_csv = X_train_pd.to_csv(index=False)
 X_test_csv = X_test_pd.to_csv(index=False)
-
-(X_train, X_test, X_train_csv, X_test_csv)

@@ -11,5 +11,3 @@ rows = []
 headers = reader.fieldnames
 for line in reader:
     rows.append(line)
-
-(headers, rows)

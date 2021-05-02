@@ -40,8 +40,7 @@
 
       <div class="col-span-2 flex justify-center">
         <Table
-          :columns="languages.columns"
-          :rows="languages.rows"
+          :tableValues="languages"
           :selected="languages.selected"
           :toogleCheck="toogleCheck"
         ></Table>
@@ -79,11 +78,7 @@
           <loading msg="Waiting results..." />
         </template>
         <template v-else>
-          <Table
-            :columns="languagesTrain.columns"
-            :rows="languagesTrain.rows"
-            :selected="null"
-          ></Table>
+          <Table :tableValues="languagesTrain" :selected="null"></Table>
         </template>
       </div>
       <div class="col-span-1 flex justify-center mb-4">
@@ -91,11 +86,7 @@
           <loading msg="Waiting results..." />
         </template>
         <template v-else>
-          <Table
-            :columns="languagesTest.columns"
-            :rows="languagesTest.rows"
-            :selected="null"
-          ></Table>
+          <Table :tableValues="languagesTest" :selected="null"></Table>
         </template>
       </div>
       <template v-if="languagesTest.rows.length > 0">
@@ -165,6 +156,12 @@ export default {
     };
   },
   methods: {
+    toObjectsList: function (a) {
+      a = a.map(function (item) {
+        return Object.fromEntries(item);
+      });
+      return a;
+    },
     initializePyodide: async function () {
       try {
         if (LOCAL_PYODIDE) {
@@ -172,9 +169,9 @@ export default {
           await Vue.loadScript(`${LOCAL_PYODIDE_SERVER_URL}pyodide.js`);
         } else {
           window.languagePluginUrl =
-            "https://cdn.jsdelivr.net/pyodide/v0.16.1/full/";
+            "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/";
           await Vue.loadScript(
-            "https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js"
+            "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js"
           );
         }
         // wait for pyodide ready
@@ -186,15 +183,21 @@ export default {
         this.errorMsg = error;
       }
     },
-    runPythonSplitDataset: function () {
+    runPythonSplitDataset: async function () {
       try {
-        const [train, test, trainCsv, testCsv] = window.pyodide.runPython(
-          train_test_split
-        );
-        this.languagesTrain.rows = train;
-        this.languagesTest.rows = test;
-        this.languagesTrain.csv = trainCsv;
-        this.languagesTest.csv = testCsv;
+        await window.pyodide.runPythonAsync(train_test_split);
+        this.languagesTrain = {
+          rows: this.toObjectsList(
+            window.pyodide.globals.get("X_train").toJs()
+          ),
+          columns: this.languagesTrain.columns,
+          csv: window.pyodide.globals.get("X_train_csv"),
+        };
+        this.languagesTest = {
+          rows: this.toObjectsList(window.pyodide.globals.get("X_test").toJs()),
+          columns: this.languagesTrain.columns,
+          csv: window.pyodide.globals.get("X_test_csv"),
+        };
       } catch (error) {
         this.errorMsg = error;
       }
@@ -202,12 +205,16 @@ export default {
       this.splittingDataset = false;
     },
     resetTables: function (columns, resetSelection) {
-      this.languagesTrain.rows = [];
-      this.languagesTest.rows = [];
-      this.languagesTrain.csv = "";
-      this.languagesTest.csv = "";
-      this.languagesTrain.columns = columns;
-      this.languagesTest.columns = columns;
+      this.languagesTrain = {
+        rows: [],
+        columns: columns,
+        csv: "",
+      };
+      this.languagesTest = {
+        rows: [],
+        columns: columns,
+        csv: "",
+      };
       this.errorMsg = null;
       if (resetSelection) {
         this.languages.selected = [];
@@ -232,9 +239,11 @@ export default {
       const that = this;
       reader.onload = (e) => {
         window.csvContent = e.target.result;
-        const [columns, rows] = window.pyodide.runPython(load_csv);
-        that.languages.columns = columns;
-        that.languages.rows = rows;
+        window.pyodide.runPython(load_csv);
+        that.languages = {
+          columns: window.pyodide.globals.get("headers").toJs(),
+          rows: this.toObjectsList(window.pyodide.globals.get("rows").toJs()),
+        };
         that.resetTables(that.languages.columns, true);
       };
       reader.readAsText(file);
