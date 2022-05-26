@@ -163,8 +163,11 @@ export default {
       return a;
     },
     initializePyodide: async function () {
+      /* global loadPyodide */
       try {
-        await Vue.loadScript("https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js");
+        await Vue.loadScript(
+          "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"
+        );
         this.pyodide = await loadPyodide({
           indexURL: "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/",
         });
@@ -179,9 +182,7 @@ export default {
       try {
         await this.pyodide.runPythonAsync(train_test_split);
         this.languagesTrain = {
-          rows: this.toObjectsList(
-            this.pyodide.globals.get("X_train").toJs()
-          ),
+          rows: this.toObjectsList(this.pyodide.globals.get("X_train").toJs()),
           columns: this.languagesTrain.columns,
           csv: this.pyodide.globals.get("X_train_csv"),
         };
