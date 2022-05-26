@@ -105,7 +105,6 @@ import Vue from "vue";
 import Table from "./Table";
 import Loading from "./Loading";
 import Alert from "./Alert";
-import { LOCAL_PYODIDE, LOCAL_PYODIDE_SERVER_URL } from "./config.js";
 
 import python_version from "raw-loader!../assets/python_version.py";
 import train_test_split from "raw-loader!../assets/train_test_split.py";
@@ -120,6 +119,7 @@ export default {
   },
   data() {
     return {
+      pyodide: null,
       splittingDataset: false,
       errorMsg: null,
       pyodideLoaded: false,
@@ -163,21 +163,16 @@ export default {
       return a;
     },
     initializePyodide: async function () {
+      /* global loadPyodide */
       try {
-        if (LOCAL_PYODIDE) {
-          window.languagePluginUrl = `${LOCAL_PYODIDE_SERVER_URL}`;
-          await Vue.loadScript(`${LOCAL_PYODIDE_SERVER_URL}pyodide.js`);
-        } else {
-          window.languagePluginUrl =
-            "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/";
-          await Vue.loadScript(
-            "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js"
-          );
-        }
-        // wait for pyodide ready
-        await window.languagePluginLoader;
+        await Vue.loadScript(
+          "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"
+        );
+        this.pyodide = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/",
+        });
         // load pandas lib
-        await window.pyodide.loadPackage(["pandas", "scikit-learn"]);
+        await this.pyodide.loadPackage(["pandas", "scikit-learn"]);
         this.pyodideLoaded = true;
       } catch (error) {
         this.errorMsg = error;
@@ -185,18 +180,16 @@ export default {
     },
     runPythonSplitDataset: async function () {
       try {
-        await window.pyodide.runPythonAsync(train_test_split);
+        await this.pyodide.runPythonAsync(train_test_split);
         this.languagesTrain = {
-          rows: this.toObjectsList(
-            window.pyodide.globals.get("X_train").toJs()
-          ),
+          rows: this.toObjectsList(this.pyodide.globals.get("X_train").toJs()),
           columns: this.languagesTrain.columns,
-          csv: window.pyodide.globals.get("X_train_csv"),
+          csv: this.pyodide.globals.get("X_train_csv"),
         };
         this.languagesTest = {
-          rows: this.toObjectsList(window.pyodide.globals.get("X_test").toJs()),
+          rows: this.toObjectsList(this.pyodide.globals.get("X_test").toJs()),
           columns: this.languagesTrain.columns,
-          csv: window.pyodide.globals.get("X_test_csv"),
+          csv: this.pyodide.globals.get("X_test_csv"),
         };
       } catch (error) {
         this.errorMsg = error;
@@ -239,17 +232,17 @@ export default {
       const that = this;
       reader.onload = (e) => {
         window.csvContent = e.target.result;
-        window.pyodide.runPython(load_csv);
+        this.pyodide.runPython(load_csv);
         that.languages = {
-          columns: window.pyodide.globals.get("headers").toJs(),
-          rows: this.toObjectsList(window.pyodide.globals.get("rows").toJs()),
+          columns: this.pyodide.globals.get("headers").toJs(),
+          rows: this.toObjectsList(this.pyodide.globals.get("rows").toJs()),
         };
         that.resetTables(that.languages.columns, true);
       };
       reader.readAsText(file);
     },
     runTestCommand: function () {
-      console.log(window.pyodide.runPython(python_version));
+      console.log(this.pyodide.runPython(python_version));
     },
     download: function (filename, text) {
       var pom = document.createElement("a");
