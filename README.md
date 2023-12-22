@@ -30,10 +30,6 @@ npm run build
 # Install browsers for the first run
 npx playwright install
 
-# When testing on CI, must build the project first
-npm run build
-
-# Runs the end-to-end tests
 npm run test
 ```
 
