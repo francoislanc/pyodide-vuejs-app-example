@@ -6,7 +6,7 @@
           <template :key="i" v-for="(c, i) in tableValues.columns">
             <th class="px-4 py-2 text-center">
               <input
-                v-if="selected"
+                v-if="props.selected"
                 type="checkbox"
                 id="checkbox"
                 :value="props.selected[i]"
@@ -65,9 +65,7 @@ const props = defineProps({
   },
   selected: {
     type: Array,
-    default: function () {
-      return []
-    }
+    default: null
   }
 })
 
