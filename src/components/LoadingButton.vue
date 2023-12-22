@@ -1,18 +1,15 @@
 <template>
   <div>
     <button type="button" class="animate-pulse button" disabled>
-      {{ msg }}
+      {{ props.msg }}
     </button>
   </div>
 </template>
 
-<script>
-export default {
-  name: "Loading",
-  props: {
-    msg: String,
-  },
-};
+<script setup lang="ts">
+const props = defineProps({
+  msg: String
+})
 </script>
 
 <style lang="postcss" scoped>

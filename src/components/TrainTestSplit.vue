@@ -7,47 +7,39 @@
           role="alert"
         >
           <span class="whitespace-pre text-lg font-semibold mr-2 text-left"
-            >Running "train_test_split" from scikit-learn in a Vue.js App
-            🧐</span
+            >Running "train_test_split" from scikit-learn in a Vue.js App 🧐</span
           >
           <br />
           <br />
-          <span class="whitespace-pre"
-            >#pyodide #webassembly #python #javascript</span
-          >
+          <span class="whitespace-pre">#pyodide #webassembly #python #javascript</span>
         </div>
       </div>
       <div class="col-span-2 flex justify-center items-center gap-4">
-        <template v-if="!pyodideLoaded">
-          <loading msg="Loading pyodide..." />
+        <template v-if="!state.pyodideLoaded">
+          <LoadingButton msg="Loading pyodide..." />
         </template>
         <template v-else>
           <label for="file" class="label-file">Upload new csv</label>
-          <input
-            id="file"
-            type="file"
-            class="input-file"
-            @change="onFileChanged"
-          />
+          <input id="file" type="file" class="input-file" @change="onFileChanged" />
         </template>
       </div>
       <div class="col-span-2">
         <h1 class="text-xl text-center font-semibold">
-          Input dataset ({{ languages.rows.length }})
+          Input dataset ({{ state.csv.rows.length }})
         </h1>
         <p class="text-center">Select columns used for stratified split</p>
       </div>
 
       <div class="col-span-2 flex justify-center">
-        <Table
-          :tableValues="languages"
-          :selected="languages.selected"
+        <PaginatedTable
+          :tableValues="state.csv"
+          :selected="state.csv.selected"
           :toogleCheck="toogleCheck"
-        ></Table>
+        ></PaginatedTable>
       </div>
       <div class="col-span-2 flex justify-center items-center gap-4">
-        <template v-if="!pyodideLoaded">
-          <loading msg="Loading pyodide..." />
+        <template v-if="!state.pyodideLoaded">
+          <LoadingButton msg="Loading pyodide..." />
         </template>
         <template v-else>
           <button class="button" v-on:click="splitDataset">
@@ -58,38 +50,38 @@
           </button>
         </template>
       </div>
-      <template v-if="errorMsg">
+      <template v-if="state.errorMsg">
         <div class="col-span-2 flex justify-center items-center gap-4">
-          <alert :msg="errorMsg" />
+          <AlertMsg :msg="state.errorMsg" />
         </div>
       </template>
       <div class="col-span-1 flex justify-center">
         <h1 class="text-xl text-center font-semibold">
-          Train dataset ({{ languagesTrain.rows.length }})
+          Train dataset ({{ state.csvTrain.rows.length }})
         </h1>
       </div>
       <div class="col-span-1 flex justify-center">
         <h1 class="text-xl text-center font-semibold">
-          Test dataset ({{ languagesTest.rows.length }})
+          Test dataset ({{ state.csvTest.rows.length }})
         </h1>
       </div>
       <div class="col-span-1 flex justify-center mb-4">
-        <template v-if="splittingDataset">
-          <loading msg="Waiting results..." />
+        <template v-if="state.splittingDataset">
+          <LoadingButton msg="Waiting results..." />
         </template>
         <template v-else>
-          <Table :tableValues="languagesTrain" :selected="null"></Table>
+          <PaginatedTable :tableValues="state.csvTrain"></PaginatedTable>
         </template>
       </div>
       <div class="col-span-1 flex justify-center mb-4">
-        <template v-if="splittingDataset">
-          <loading msg="Waiting results..." />
+        <template v-if="state.splittingDataset">
+          <LoadingButton msg="Waiting results..." />
         </template>
         <template v-else>
-          <Table :tableValues="languagesTest" :selected="null"></Table>
+          <PaginatedTable :tableValues="state.csvTest"></PaginatedTable>
         </template>
       </div>
-      <template v-if="languagesTest.rows.length > 0">
+      <template v-if="state.csvTest.rows.length > 0">
         <div class="col-span-2 flex justify-center items-center gap-4 mb-4">
           <button class="button" v-on:click="downloadDataset">
             <span style="white-space: pre"> Download datasets </span>
@@ -100,175 +92,179 @@
   </div>
 </template>
 
-<script>
-import Vue from "vue";
-import Table from "./Table";
-import Loading from "./Loading";
-import Alert from "./Alert";
+<script setup lang="ts">
+import PaginatedTable from './PaginatedTable.vue'
+import LoadingButton from './LoadingButton.vue'
+import AlertMsg from './AlertMsg.vue'
 
-import python_version from "raw-loader!../assets/python_version.py";
-import train_test_split from "raw-loader!../assets/train_test_split.py";
-import load_csv from "raw-loader!../assets/load_csv.py";
+import python_version from '../assets/python_version.py?raw'
+import train_test_split from '../assets/train_test_split.py?raw'
+import load_csv from '../assets/load_csv.py?raw'
 
-export default {
-  name: "TrainTestSplit",
-  components: {
-    Table,
-    Alert,
-    Loading,
+import { reactive, onMounted } from 'vue'
+import type { State } from './Types'
+
+const state: State = reactive({
+  pyodide: null,
+  splittingDataset: false,
+  errorMsg: null,
+  pyodideLoaded: false,
+  csv: {
+    selected: [false, false],
+    columns: ['name', 'language'],
+    rows: [
+      { name: 'Pasquin', language: 'java' },
+      { name: 'Flimflam', language: 'java' },
+      { name: 'Flimflam2', language: 'java' },
+      { name: 'Donvidn', language: 'python' },
+      { name: 'Zoography', language: 'python' },
+      { name: 'Tetramorph', language: 'python' },
+      { name: 'Tetramorph1', language: 'python' },
+      { name: 'Tetramorph2', language: 'python' },
+      { name: 'Tetramorph3', language: 'python' },
+      { name: 'Tetramorph4', language: 'python' },
+      { name: 'Kamagraphy', language: 'python' },
+      { name: 'Quietya57', language: 'c' },
+      { name: 'Sequacious', language: 'c' },
+      { name: 'Sequacious2', language: 'c' }
+    ]
   },
-  data() {
-    return {
-      pyodide: null,
-      splittingDataset: false,
-      errorMsg: null,
-      pyodideLoaded: false,
-      languages: {
-        selected: [false, false],
-        columns: ["name", "language"],
-        rows: [
-          { name: "Pasquin", language: "java" },
-          { name: "Flimflam", language: "java" },
-          { name: "Flimflam2", language: "java" },
-          { name: "Donvidn", language: "python" },
-          { name: "Zoography", language: "python" },
-          { name: "Tetramorph", language: "python" },
-          { name: "Tetramorph1", language: "python" },
-          { name: "Tetramorph2", language: "python" },
-          { name: "Tetramorph3", language: "python" },
-          { name: "Tetramorph4", language: "python" },
-          { name: "Kamagraphy", language: "python" },
-          { name: "Quietya57", language: "c" },
-          { name: "Sequacious", language: "c" },
-          { name: "Sequacious2", language: "c" },
-        ],
-      },
-      languagesTrain: {
-        columns: ["name", "language"],
-        rows: [],
-        csv: "",
-      },
-      languagesTest: {
-        columns: ["name", "language"],
-        rows: [],
-        csv: "",
-      },
-    };
+  csvTrain: {
+    columns: ['name', 'language'],
+    rows: [],
+    csv: ''
   },
-  methods: {
-    toObjectsList: function (a) {
-      a = a.map(function (item) {
-        return Object.fromEntries(item);
-      });
-      return a;
-    },
-    initializePyodide: async function () {
-      /* global loadPyodide */
-      try {
-        await Vue.loadScript(
-          "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"
-        );
-        this.pyodide = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/",
-        });
-        // load pandas lib
-        await this.pyodide.loadPackage(["pandas", "scikit-learn"]);
-        this.pyodideLoaded = true;
-      } catch (error) {
-        this.errorMsg = error;
-      }
-    },
-    runPythonSplitDataset: async function () {
-      try {
-        await this.pyodide.runPythonAsync(train_test_split);
-        this.languagesTrain = {
-          rows: this.toObjectsList(this.pyodide.globals.get("X_train").toJs()),
-          columns: this.languagesTrain.columns,
-          csv: this.pyodide.globals.get("X_train_csv"),
-        };
-        this.languagesTest = {
-          rows: this.toObjectsList(this.pyodide.globals.get("X_test").toJs()),
-          columns: this.languagesTrain.columns,
-          csv: this.pyodide.globals.get("X_test_csv"),
-        };
-      } catch (error) {
-        this.errorMsg = error;
-      }
+  csvTest: {
+    columns: ['name', 'language'],
+    rows: [],
+    csv: ''
+  }
+})
 
-      this.splittingDataset = false;
-    },
-    resetTables: function (columns, resetSelection) {
-      this.languagesTrain = {
-        rows: [],
-        columns: columns,
-        csv: "",
-      };
-      this.languagesTest = {
-        rows: [],
-        columns: columns,
-        csv: "",
-      };
-      this.errorMsg = null;
-      if (resetSelection) {
-        this.languages.selected = [];
-        for (let i = 0; i < this.languages.selected.length; i++) {
-          this.languages.selected.push(false);
+const toObjectsList = (a: any) => {
+  a = a.map(function (item: any) {
+    return Object.fromEntries(item)
+  })
+  return a
+}
+const initializePyodide = async () => {
+  try {
+    // @ts-ignore : global loadPyodide
+    state.pyodide = await loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.20.0/full/'
+    })
+    // load pandas lib
+    if (state.pyodide) {
+      await state.pyodide.loadPackage(['pandas', 'scikit-learn'])
+    }
+    state.pyodideLoaded = true
+  } catch (error: any) {
+    state.errorMsg = error
+  }
+}
+const runPythonSplitDataset = async () => {
+  try {
+    if (state.pyodide) {
+      await state.pyodide.runPythonAsync(train_test_split)
+      state.csvTrain = {
+        rows: toObjectsList(state.pyodide.globals.get('X_train').toJs()),
+        columns: state.csvTrain.columns,
+        csv: state.pyodide.globals.get('X_train_csv')
+      }
+      state.csvTest = {
+        rows: toObjectsList(state.pyodide.globals.get('X_test').toJs()),
+        columns: state.csvTrain.columns,
+        csv: state.pyodide.globals.get('X_test_csv')
+      }
+    }
+  } catch (error: any) {
+    state.errorMsg = error
+  }
+
+  state.splittingDataset = false
+}
+const resetTables = (columns: Array<string>, resetSelection: boolean) => {
+  state.csvTrain = {
+    rows: [],
+    columns: columns,
+    csv: ''
+  }
+  state.csvTest = {
+    rows: [],
+    columns: columns,
+    csv: ''
+  }
+  state.errorMsg = null
+  if (resetSelection) {
+    state.csv.selected = []
+    for (let i = 0; i < state.csv.selected.length; i++) {
+      state.csv.selected.push(false)
+    }
+  }
+}
+const splitDataset = () => {
+  // @ts-ignore
+  window.csv = JSON.stringify(state.csv)
+  resetTables(state.csv.columns, false)
+  state.splittingDataset = true
+  setTimeout(runPythonSplitDataset, 500)
+}
+const downloadDataset = () => {
+  if (state.csvTrain.csv) {
+    download('train.csv', state.csvTrain.csv)
+  }
+  if (state.csvTest.csv) {
+    download('test.csv', state.csvTest.csv)
+  }
+}
+const onFileChanged = (event: Event) => {
+  if (event.target) {
+    let inputEl = event.target as HTMLInputElement
+    if (inputEl && inputEl.files && inputEl.files.length > 0) {
+      const file = inputEl.files[0]
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        // @ts-ignore
+        window.csvContent = e.target.result
+        if (state.pyodide) {
+          state.pyodide.runPython(load_csv)
+          state.csv = {
+            columns: state.pyodide.globals.get('headers').toJs(),
+            rows: toObjectsList(state.pyodide.globals.get('rows').toJs())
+          }
+          resetTables(state.csv.columns, true)
         }
       }
-    },
-    splitDataset: function () {
-      window.languages = JSON.stringify(this.languages);
-      this.resetTables(this.languages.columns, false);
-      this.splittingDataset = true;
-      setTimeout(this.runPythonSplitDataset, 500);
-    },
-    downloadDataset: function () {
-      this.download("train.csv", this.languagesTrain.csv);
-      this.download("test.csv", this.languagesTest.csv);
-    },
-    onFileChanged: function (event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      const that = this;
-      reader.onload = (e) => {
-        window.csvContent = e.target.result;
-        this.pyodide.runPython(load_csv);
-        that.languages = {
-          columns: this.pyodide.globals.get("headers").toJs(),
-          rows: this.toObjectsList(this.pyodide.globals.get("rows").toJs()),
-        };
-        that.resetTables(that.languages.columns, true);
-      };
-      reader.readAsText(file);
-    },
-    runTestCommand: function () {
-      console.log(this.pyodide.runPython(python_version));
-    },
-    download: function (filename, text) {
-      var pom = document.createElement("a");
-      pom.setAttribute(
-        "href",
-        "data:text/csv;charset=utf-8," + encodeURIComponent(text)
-      );
-      pom.setAttribute("download", filename);
+      reader.readAsText(file)
+    }
+  }
+}
+const runTestCommand = () => {
+  if (state.pyodide) {
+    console.log(state.pyodide.runPython(python_version))
+  }
+}
+const download = (filename: string, text: string) => {
+  var pom = document.createElement('a')
+  pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(text))
+  pom.setAttribute('download', filename)
+  pom.click()
+}
+const toogleCheck = (i: number) => {
+  if (state.csv.selected) {
+    state.csv.selected[i] = !state.csv.selected[i]
+  }
+}
 
-      if (document.createEvent) {
-        var event = document.createEvent("MouseEvents");
-        event.initEvent("click", true, true);
-        pom.dispatchEvent(event);
-      } else {
-        pom.click();
-      }
-    },
-    toogleCheck(i) {
-      this.$set(this.languages.selected, i, !this.languages.selected[i]);
-    },
-  },
-  mounted: async function () {
-    await this.initializePyodide();
-    this.runTestCommand();
-  },
-};
+onMounted(async () => {
+  let pyodideScript = document.createElement('script')
+  pyodideScript.setAttribute('src', 'https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js')
+  pyodideScript.onload = async () => {
+    await initializePyodide()
+    runTestCommand()
+  }
+  document.head.appendChild(pyodideScript)
+})
 </script>
 
 <style lang="postcss" scoped>
