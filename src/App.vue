@@ -1,16 +1,9 @@
-<template>
-  <div id="app">
-    <TrainTestSplit />
-  </div>
-</template>
-
-<script>
-import TrainTestSplit from "./components/TrainTestSplit.vue";
-
-export default {
-  name: "App",
-  components: {
-    TrainTestSplit,
-  },
-};
+<script setup lang="ts">
+import TrainTestSplit from './components/TrainTestSplit.vue'
 </script>
+
+<template>
+  <main>
+    <TrainTestSplit />
+  </main>
+</template>

@@ -8,30 +8,33 @@ For more information on Pyodide, checkout this [mozilla blog post](https://hacks
 
 ## Project setup
 
-```
-yarn install
-```
-
-### Compiles and hot-reloads for development
-
-```
-yarn serve
+```sh
+npm install
 ```
 
-### Compiles and minifies for production
+### Compile and Hot-Reload for Development
 
-```
-yarn build
-```
-
-### Lints and fixes files
-
-```
-yarn lint
+```sh
+npm run dev
 ```
 
-### Test
+### Type-Check, Compile and Minify for Production
 
+```sh
+npm run build
 ```
-yarn test
+
+### Run End-to-End Tests with [Playwright](https://playwright.dev)
+
+```sh
+# Install browsers for the first run
+npx playwright install
+
+npm run test
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
 ```
