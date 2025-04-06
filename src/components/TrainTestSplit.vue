@@ -151,7 +151,7 @@ const initializePyodide = async () => {
   try {
     // @ts-ignore : global loadPyodide
     state.pyodide = await loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.5/full/'
     })
     // load pandas lib
     if (state.pyodide) {
@@ -258,7 +258,7 @@ const toogleCheck = (i: number) => {
 
 onMounted(async () => {
   let pyodideScript = document.createElement('script')
-  pyodideScript.setAttribute('src', 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js')
+  pyodideScript.setAttribute('src', 'https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js')
   pyodideScript.onload = async () => {
     await initializePyodide()
     runTestCommand()
