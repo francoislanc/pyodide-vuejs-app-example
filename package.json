@@ -12,7 +12,7 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "deploy": "rm -rf node_modules/.cache && rm -rf dist && npm run build && touch dist/.nojekyll && gh-pages -d dist -t true"
+    "deploy": "rm -rf node_modules/.cache && rm -rf dist && npm run build && touch dist/.nojekyll && gh-pages -d dist --dotfiles"
   },
   "dependencies": {
     "vue": "^3.3.11"
